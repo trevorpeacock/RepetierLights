@@ -7,6 +7,8 @@ import peacocktech.daemon_task
 import serial
 import requests
 
+execfile('/etc/repetierLights.py')
+
 def maprange(val, flow, fhi, tlow, thi):
     val = min(max(val, flow), fhi)
     val = 1.0*(val-flow) / (fhi-flow)
@@ -19,20 +21,12 @@ class LightUpdaterTask(peacocktech.daemon_task.ScheduledTask):
     def postinit(self, *k, **kk):
         self.execute(True)
     def execute(self, runnow):
-        host = 'localhost'
-        port = 3344
-        printer = 'Anet_A8'
-        apikey = ''
         url = 'http://{}:{}/printer/api/{}?a=stateList&apikey={}'.format(host, port, printer, apikey)
         self.log(4, 'Fetching {}'.format(url))
         printerdata = requests.get(url).json()[printer]
         url = 'http://{}:{}/printer/api/{}?a=listPrinter&apikey={}'.format(host, port, printer, apikey)
         self.log(4, 'Fetching {}'.format(url))
         jobdata = requests.get(url).json()
-        #[{"active":true,"job":"none","name":"Anet A8","online":1,"paused":false,"slug":"Anet_A9"}]
-        #[{"active":true,"analysed":1,"done":9.9173553719008272,"job":"Spin","jobid":3,"linesSend":36,
-        # "name":"Anet A8","ofLayer":0,"online":1,"paused":false,"printTime":4226.2357745743502,
-        # "printedTimeComp":193.91237629693507,"slug":"Anet_A9","start":1492199243,"totalLines":363}]
         def get_led(jobdata, printerdata):
             self.log(4, 'Printer Data {}'.format(printerdata))
             self.log(4, 'Job Data {}'.format(jobdata))
@@ -42,8 +36,6 @@ class LightUpdaterTask(peacocktech.daemon_task.ScheduledTask):
             temp = maprange(temp, 0, 255, 80, 0)
             if type(jobdata)!=list or len(jobdata)!=1:
                 return [0, 255, 255, 0, 0, 16, 128]
-            #if 'printTime' not in jobdata[0] and 'printedTimeComp' not in jobdata[0]:
-            #if 'linesSend' not in jobdata[0] and 'totalLines' not in jobdata[0]:
             if 'done' not in jobdata[0]:
                 return [42, 255, 64, temp, 128, 16, 255]
             complete = jobdata[0]['done']
@@ -95,5 +87,4 @@ class ServerD(peacocktech.daemon.Daemon):
 server=ServerD()
 
 server.start()
-#server.startinthread()
 
