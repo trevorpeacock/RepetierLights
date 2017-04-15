@@ -1,0 +1,7 @@
+Package: repeterlights
+Description: Controls lights for Repetier
+Version: 0.1
+Architecture: all
+Maintainer: Trevor Peacock [trevorp@peacocktech.com]
+Depends: python-serial, python-requests
+
