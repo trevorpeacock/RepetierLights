@@ -156,8 +156,8 @@ String string_extract_numbers(String s, int count, byte b[]) {
   return s;
 }
 
-void process_serial_command(String command) {
-  if(count_string_instances(command, ',')!=6) return;
+bool process_serial_command(String command) {
+  if(count_string_instances(command, ',')!=6) return false;
   byte col[3];
   command=string_extract_numbers(command, 3, col);
   status_col=CHSV(int(col[0]), int(col[1]), int(col[2]));
@@ -165,6 +165,7 @@ void process_serial_command(String command) {
   status_col_background=CHSV(int(col[0]), int(col[1]), int(col[2]));
   command=string_extract_numbers(command, 1, col);
   status_complete=col[0];
+  return true;
 }
 
 void check_serial() {
@@ -175,7 +176,9 @@ void check_serial() {
     //Serial.write('>');
     //print_string(Serial, command);
     //Serial.write('\n');
-    process_serial_command(command);
+    if(!process_serial_command(command)) {
+      Serial.println('repetierLights: Invalid Command');
+    }
   }
 }
 
