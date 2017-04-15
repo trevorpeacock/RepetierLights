@@ -6,6 +6,7 @@ import peacocktech.daemon
 import peacocktech.daemon_task
 import serial
 import requests
+import math
 
 execfile('/etc/repetierLights.py')
 
@@ -35,14 +36,17 @@ class LightUpdaterTask(peacocktech.daemon_task.ScheduledTask):
                 temp = max(temp, maprange(extruder['tempRead'], 35, 80, 0, 255))
             temp = maprange(temp, 0, 255, 80, 0)
             if type(jobdata)!=list or len(jobdata)!=1:
-                return [0, 255, 255, 0, 0, 16, 128]
+                #a few bright white with a dim white, error code
+                return [0, 0, 255, 0, 0, 16, 16]
             if 'done' not in jobdata[0]:
-                return [42, 255, 64, temp, 128, 16, 255]
+                #all dimly indicating temperature, as background so it doesn't glow
+                return [42, 255, 64, temp, 255, 64, 0]
             complete = jobdata[0]['done']
-            complete = int(complete * 255/100)
+            complete = math.ceil(complete * 255/100)
             if complete > 255: complete = 255
             if complete < 0: complete = 0
-            return [96, 255, 64, temp, 128, 16, complete]
+            #green complete bar, background indicating temp
+            return [96, 255, 64, temp, 255, 16, complete]
         numbers = get_led(jobdata, printerdata)
         s = '{}\n'.format(','.join([str(int(n)) for n in numbers]))
         self.log(4, 'Sending String {}'.format(s))

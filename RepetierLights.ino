@@ -62,7 +62,8 @@ class DoorPattern: public Pattern {
     }
 
     virtual void update(CRGB ledbuffer[]) {
-      int no_leds=map(status_complete, 0, 255, 0, NUM_LEDS);
+      int no_leds=map(status_complete, 0, 255, 0, NUM_LEDS-1);
+      if(status_complete==0) no_leds=-1;
       //Serial.println(no_leds);
       for (int i = 0; i < NUM_LEDS; i++) {
         if(i<=no_leds) {
