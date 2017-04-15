@@ -122,6 +122,7 @@ void setup() {
   //FastLED.setMaxPowerInVoltsAndMilliamps(5,200);
   Serial.begin(9600);
   Serial.setTimeout(0);
+  Serial.write("repetierLights\n");
 
   if(digitalRead(DOOR_SENSOR_DATA_DPIN)) {
     door_fade=255;
@@ -177,7 +178,7 @@ void check_serial() {
     //print_string(Serial, command);
     //Serial.write('\n');
     if(!process_serial_command(command)) {
-      Serial.println('repetierLights: Invalid Command');
+      Serial.write("repetierLights: Invalid Command\n");
     }
   }
 }
