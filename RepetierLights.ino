@@ -106,9 +106,13 @@ DoorPattern doorpattern = DoorPattern();
 LightPattern lightpattern = LightPattern();
 
 void setup() {
+  Serial.begin(9600);
+  Serial.setTimeout(0);
+  Serial.write("repetierLights\n");
+
   read_eeprom();
-  status_col=CRGB::Green;
-  status_col_background=CRGB::Black;
+  status_col=CRGB::Black;
+  status_col_background=CRGB::Blue;
   status_complete=128;
   pinMode(DOOR_SENSOR_DATA_DPIN, INPUT_PULLUP);
 
@@ -120,9 +124,6 @@ void setup() {
   FastLED.addLeds<NEOPIXEL, LIGHT1_LED_DATA_DPIN>(light_leds, NUM_LEDS);
   FastLED.addLeds<NEOPIXEL, LIGHT2_LED_DATA_DPIN>(light_leds, NUM_LEDS);
   //FastLED.setMaxPowerInVoltsAndMilliamps(5,200);
-  Serial.begin(9600);
-  Serial.setTimeout(0);
-  Serial.write("repetierLights\n");
 
   if(digitalRead(DOOR_SENSOR_DATA_DPIN)) {
     door_fade=255;
