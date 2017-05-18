@@ -12,6 +12,9 @@ CRGB light_leds[NUM_LEDS];
 #define LIGHT2_LED_DATA_DPIN 5
 #define BUTTON_PANEL_APIN 0
 
+#define POWER_RELAY_PIN 7
+bool power_relay_status;
+
 #define DOOR_FADE_SPEED 8
 #define LIGHT_SCROLL_SPEED 8
 byte light_brightness_open;
@@ -116,6 +119,9 @@ void setup() {
   status_complete=128;
   pinMode(DOOR_SENSOR_DATA_DPIN, INPUT_PULLUP);
 
+  pinMode(POWER_RELAY_PIN, OUTPUT);
+  power_relay_status=false;
+
   for(int i=0; i<NUM_LEDS; i++) {
     door_leds[i]=CRGB::Black;
     light_leds[i]=CRGB::Black;
@@ -158,7 +164,7 @@ String string_extract_numbers(String s, int count, byte b[]) {
   return s;
 }
 
-bool process_serial_command(String command) {
+bool process_light_command(String command) {
   if(count_string_instances(command, ',')!=6) return false;
   byte col[3];
   command=string_extract_numbers(command, 3, col);
@@ -170,14 +176,35 @@ bool process_serial_command(String command) {
   return true;
 }
 
+bool process_power_command(String command) {
+  if(command=="1") {
+    power_relay_status=true;
+    return true;
+  }
+  if(command=="0") {
+    power_relay_status=false;
+    return true;
+  }
+  return false;
+}
+
+bool process_serial_command(String command) {
+  if(command[0]=='L') {
+      command.remove(0, 1);
+      return process_light_command(command);
+  }
+  if(command[0]=='P') {
+      command.remove(0, 1);
+      return process_power_command(command);
+  }
+  return false;
+}
+
 void check_serial() {
   if(commandqueue.indexOf('\n')!=-1) {
     int linebreak = commandqueue.indexOf('\n');
     String command = commandqueue.substring(0, linebreak);
     commandqueue.remove(0, linebreak+1);
-    //Serial.write('>');
-    //print_string(Serial, command);
-    //Serial.write('\n');
     if(!process_serial_command(command)) {
       Serial.write("repetierLights: Invalid Command\n");
     }
@@ -221,6 +248,7 @@ void check_buttons() {
 }
 
 void loop() {
+  digitalWrite(POWER_RELAY_PIN, power_relay_status);
   check_buttons();
   doorpattern.update(door_leds);
   lightpattern.update(light_leds);
