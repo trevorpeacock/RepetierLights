@@ -1,4 +1,6 @@
 #!/bin/bash
 
+update-rc.d repetierlights defaults
+
 /etc/init.d/repetierlights start
 

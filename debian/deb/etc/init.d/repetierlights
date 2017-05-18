@@ -1,8 +1,15 @@
 #!/bin/sh
-# example python daemon starter script
-# based on skeleton from Debian GNU/Linux
-# cliechti@gmx.net
-# place the daemon scripts in a folder accessible by root. /usr/local/sbin is a good idea
+#
+### BEGIN INIT INFO
+# Provides:          repetierlights
+# Required-Start:    $all
+# Required-Stop:     $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: light manager for 3d printer
+# Description:       controls arduino functions connected to 3d printer
+#                    server.
+### END INIT INFO
 
 cd $(dirname $0)
 

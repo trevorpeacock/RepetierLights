@@ -50,6 +50,7 @@ class Arduino(object):
         else:
             port = self.port
         self.ser = serial.Serial(port, self.baud)
+        time.sleep(3)
     def write(self, data):
         try:
             self.open()
@@ -104,7 +105,7 @@ class LightUpdaterTask(peacocktech.daemon_task.ScheduledTask):
             #green complete bar, background indicating temp
             return [96, 255, 64, temp, 255, 16, complete]
         numbers = get_led(jobdata, printerdata)
-        s = '{}\n'.format(','.join([str(int(n)) for n in numbers]))
+        s = 'L{}\n'.format(','.join([str(int(n)) for n in numbers]))
         self.log(4, 'Sending String {}'.format(s))
         self.arduino.write(s)
 
@@ -122,6 +123,7 @@ class ServerD(peacocktech.daemon.Daemon):
         self.log.log(3, 'Starting')
         self.status.update('Status', 'Starting')
         arduino = Arduino(self.log, serial_port, serial_port_baud)
+        arduino.write('P1\n')
         self.tasks.registertask(LightUpdaterTask, arduino)
         self.status.update('Status', 'Running')
         
@@ -133,6 +135,8 @@ class ServerD(peacocktech.daemon.Daemon):
 
         self.log.log(3, 'Stopping')
         self.status.update('Status', 'Stopping')
+        arduino.write('P0\n')
+        time.sleep(0.5)
         arduino.close()
         self.status.update('Status', 'Stopped')
         self.log.log(3, 'Stopped')
