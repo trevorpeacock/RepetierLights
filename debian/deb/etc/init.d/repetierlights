@@ -14,7 +14,7 @@
 cd $(dirname $0)
 
 HOME=/
-#HOME=/home/trevorp/3dprinterlights/deb/
+#HOME=/home/printer3d/git/RepetierLights/debian/deb/
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=usr/lib/repetierlights/daemon.py
 DAEMON=$HOME$DAEMON

@@ -52,6 +52,7 @@ class Arduino(object):
         self.ser = serial.Serial(port, self.baud)
         time.sleep(3)
     def write(self, data):
+        self.log(4, 'Sending String {}'.format(data))
         try:
             self.open()
             self.ser.write(data)
@@ -88,16 +89,22 @@ class LightUpdaterTask(peacocktech.daemon_task.ScheduledTask):
                 #a few bright white with a dim white, error code
                 return [0, 0, 255, 0, 0, 16, 16]
             printerdata = printerdata[printer]
-            temp = maprange(printerdata['heatedBed']['tempRead'], 35, 50, 0, 255)
-            for extruder in printerdata['extruder']:
-                temp = max(temp, maprange(extruder['tempRead'], 35, 80, 0, 255))
-            temp = maprange(temp, 0, 255, 64, 0)
+            jobdata = [job for job in jobdata if job['slug']==printer]
             if type(jobdata)!=list or len(jobdata)!=1:
                 #a few bright white with a dim white, error code
-                return [0, 0, 255, 0, 0, 16, 16]
+                return [0, 0, 255, 0, 0, 32, 32]
+
+            temp = 0
+            for bed in printerdata['heatedBeds']:
+                temp = max(temp, maprange(bed['tempRead'], 40, 50, 0, 255))
+            for extruder in printerdata['extruder']:
+                temp = max(temp, maprange(extruder['tempRead'], 40, 80, 0, 255))
+            temp = maprange(temp, 0, 255, 64, 0)
+
             if 'done' not in jobdata[0]:
                 #all dimly indicating temperature, as background so it doesn't glow
                 return [42, 255, 64, temp, 255, 64, 0]
+
             complete = jobdata[0]['done']
             complete = math.ceil(complete * 255/100)
             if complete > 255: complete = 255
@@ -106,7 +113,6 @@ class LightUpdaterTask(peacocktech.daemon_task.ScheduledTask):
             return [96, 255, 64, temp, 255, 16, complete]
         numbers = get_led(jobdata, printerdata)
         s = 'L{}\n'.format(','.join([str(int(n)) for n in numbers]))
-        self.log(4, 'Sending String {}'.format(s))
         self.arduino.write(s)
 
 
